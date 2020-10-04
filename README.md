@@ -35,7 +35,7 @@ cipher.Decrypt(data); // in-place decryption
 This implementation uses OpenMP if available, so it will be parallel by default. Also, 
 Kalyna implementation is not completely optimal.
 
-| Algorithm | Encode+Decode 1GB (OMP disabled) | Encode+Decode 1GB (OMP enabled) |
+| Algorithm | Encrypt+Decrypt 1GB (OMP disabled) | Encrypt+Decrypt 1GB (OMP enabled) |
 | ------------- | ------------- | ------------- |
 | AES128  | 35.6s  | 11.3s  | 
 | Kalyna 128/128  | 242.0s  | 79.5s  |
