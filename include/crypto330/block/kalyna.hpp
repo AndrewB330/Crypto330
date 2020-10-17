@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "base.hpp"
+#include "block.hpp"
 
 class Kalyna : public BlockEncryption {
 public:

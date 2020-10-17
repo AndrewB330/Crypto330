@@ -1,11 +1,10 @@
 #include <iostream>
-#include <crypto330/aes.hpp>
+#include <crypto330/block/aes.hpp>
 #include <fstream>
 #include <chrono>
-#include <crypto330/utils.hpp>
-#include <crypto330/kalyna.hpp>
+#include <crypto330/block/utils.hpp>
+#include <crypto330/block/kalyna.hpp>
 
-//UInt128 key{{0x13, 0x11, 0x95, 0xaf, 0xf3, 0xe2, 0x11, 0xaa, 0xb3, 0x41, 0x46, 0xb3, 0xf1, 0x1f, 0xfc, 0xdb}};
 AES aes(AES::Type::AES128, "2b7e151628aed2a6abf7158809cf4f3c", true);
 Kalyna kalyna(Kalyna::Type::K128_128, "000102030405060708090A0B0C0D0E0F", true);
 Kalyna kalyna512(Kalyna::Type::K512_256, std::string() +

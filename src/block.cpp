@@ -1,4 +1,4 @@
-#include <crypto330/base.hpp>
+#include <crypto330/block/block.hpp>
 #include <fstream>
 
 void BlockEncryption::EncryptFile(const std::string &source, const std::string &destination) const {
@@ -48,4 +48,8 @@ void BlockEncryption::ProcessData(std::vector<uint8_t> &data, bool encryption) c
     for (size_t byte = 0; byte < data.size(); byte += block_bytes) {
         (encryption ? EncryptBlock(data.data() + byte) : DecryptBlock(data.data() + byte));
     }
+}
+
+uint64_t BlockEncryption::GetBlockBytes() const {
+    return block_bytes;
 }

@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
-#include <crypto330/kalyna.hpp>
-#include <crypto330/utils.hpp>
-#include <crypto330/aes.hpp>
+#include <crypto330/block/kalyna.hpp>
+#include <crypto330/block/utils.hpp>
+#include <crypto330/block/aes.hpp>
+#include <crypto330/stream/block_stream.hpp>
+#include <crypto330/stream/rc4.hpp>
 
 // Test data from original papers
 
@@ -96,6 +98,82 @@ TEST(AES, Decryption) {
     aes.Encrypt(data);
     aes.Decrypt(data);
 
+    EXPECT_EQ(data, expected);
+}
+
+TEST(Stream, ECB_AES) {
+    std::vector<uint8_t> data = StringToBytes("Some random data, words, and other, !5$2552ASxv b\nf");
+    std::vector<uint8_t> expected = data;
+    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
+
+    enc.Encrypt(data, BlockStreamEncryption::Mode::ECB);
+    EXPECT_NE(data, expected);
+    enc.Decrypt(data, BlockStreamEncryption::Mode::ECB);
+    EXPECT_EQ(data, expected);
+}
+
+TEST(Stream, CBC_AES) {
+    std::vector<uint8_t> data = StringToBytes("XX Some random data, words, and other, !5$2552ASxv b\nf");
+    std::vector<uint8_t> expected = data;
+    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
+
+    EXPECT_EQ(data[0], data[1]);
+    enc.Encrypt(data, BlockStreamEncryption::Mode::CBC);
+    EXPECT_NE(data, expected);
+    EXPECT_NE(data[0], data[1]);
+    enc.Decrypt(data, BlockStreamEncryption::Mode::CBC);
+    EXPECT_EQ(data, expected);
+}
+
+TEST(Stream, OFB_AES) {
+    std::vector<uint8_t> data = StringToBytes("XX Some random data, words, and other, !5$2552ASxv b\nf");
+    std::vector<uint8_t> expected = data;
+    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
+
+    EXPECT_EQ(data[0], data[1]);
+    enc.Encrypt(data, BlockStreamEncryption::Mode::OFB);
+    EXPECT_NE(data, expected);
+    EXPECT_NE(data[0], data[1]);
+    enc.Decrypt(data, BlockStreamEncryption::Mode::OFB);
+    EXPECT_EQ(data, expected);
+}
+
+TEST(Stream, CTR_AES) {
+    std::vector<uint8_t> data = StringToBytes("XX Some random data, words, and other, !5$2552ASxv b\nf");
+    std::vector<uint8_t> expected = data;
+    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
+
+    EXPECT_EQ(data[0], data[1]);
+    enc.Encrypt(data, BlockStreamEncryption::Mode::CTR);
+    EXPECT_NE(data, expected);
+    EXPECT_NE(data[0], data[1]);
+    enc.Decrypt(data, BlockStreamEncryption::Mode::CTR);
+    EXPECT_EQ(data, expected);
+}
+
+TEST(Stream, CFB_AES) {
+    std::vector<uint8_t> data = StringToBytes("XX Some random data, words, and other, !5$2552ASxv b\nf");
+    std::vector<uint8_t> expected = data;
+    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
+
+    EXPECT_EQ(data[0], data[1]);
+    enc.Encrypt(data, BlockStreamEncryption::Mode::CFB);
+    EXPECT_NE(data, expected);
+    EXPECT_NE(data[0], data[1]);
+    enc.Decrypt(data, BlockStreamEncryption::Mode::CFB);
+    EXPECT_EQ(data, expected);
+}
+
+TEST(Stream, RC4) {
+    std::vector<uint8_t> data = StringToBytes("XX Some random data, words, and other, !5$2552ASxv b\nf");
+    std::vector<uint8_t> expected = data;
+    RC4 enc("Cool RC4 Key");
+
+    EXPECT_EQ(data[0], data[1]);
+    enc.Encrypt(data);
+    EXPECT_NE(data, expected);
+    EXPECT_NE(data[0], data[1]);
+    enc.Decrypt(data);
     EXPECT_EQ(data, expected);
 }
 

@@ -1,6 +1,6 @@
 #include <algorithm>
-#include <crypto330/aes.hpp>
-#include <crypto330/utils.hpp>
+#include <crypto330/block/aes.hpp>
+#include <crypto330/block/utils.hpp>
 #include <fstream>
 #include <memory.h>
 #include <omp.h>

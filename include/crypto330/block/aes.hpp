@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <iostream>
-#include "base.hpp"
+#include "block.hpp"
 
 class AES : public BlockEncryption {
 public:

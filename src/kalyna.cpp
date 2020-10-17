@@ -1,6 +1,6 @@
-#include <crypto330/kalyna.hpp>
+#include <crypto330/block/kalyna.hpp>
 #include <algorithm>
-#include <crypto330/utils.hpp>
+#include <crypto330/block/utils.hpp>
 #include <cassert>
 
 void Kalyna::BuildKeyExpansion() {

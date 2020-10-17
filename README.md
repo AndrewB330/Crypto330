@@ -1,8 +1,12 @@
 # Crypto330
 
-![XLOCC](https://europe-west6-xlocc-badge.cloudfunctions.net/XLOCC/AndrewB330/Crypto330?caption=Lines&color=blue&kill_cache=1)
+![XLOCC](https://europe-west6-xlocc-badge.cloudfunctions.net/XLOCC/AndrewB330/Crypto330?caption=Lines&color=blue&kill_cache=3)
 
-University project. Implementation of AES and Kalyna block ciphers.
+University project. Implementation of:
+- AES block cipher (128, 196, 256 key sizes)
+- Kalyna block cipher (128/128, 256/128, 256/256, 512/256, 512/512 types)
+- RC4 stream cipher (n = 8)
+- ECB, CBC, CFB, OFB, CTR block cipher mode of operation
 
 ## Usage
 
@@ -13,8 +17,10 @@ target_link_libraries(<TARGET_NAME> crypto330)
 ```
 Code:
 ```c++
-#include <crypto330/aes.hpp>
-#include <crypto330/kalyna.hpp>
+#include <crypto330/block/aes.hpp>
+#include <crypto330/block/kalyna.hpp>
+#include <crypto330/stream/block_stream.hpp>
+#include <crypto330/stream/rc4.hpp>
 
 // ...
 
@@ -29,6 +35,14 @@ cipher.DecryptFile("encrypted.txt", "decrypted.txt");
 std::vector<uint8_t> data = {0x01, 0xb2, ..., 0x32, 0xfa}; // any bytes
 cipher.Encrypt(data); // in-place encryption
 cipher.Decrypt(data); // in-place decryption
+
+BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, "Cool AES Key"));
+enc.Encrypt(data, BlockStreamEncryption::Mode::CFB);
+enc.Decrypt(data, BlockStreamEncryption::Mode::CFB);
+
+RC4 rc4("Cool RC4 Key");
+rc4.Encrypt(data);
+rc4.Decrypt(data);
 ```
 
 ## Benchmarks

@@ -7,15 +7,23 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,100000000")
 
 set(
         HEADERS
-        include/crypto330/aes.hpp
-        include/crypto330/utils.hpp
-        include/crypto330/kalyna.hpp include/crypto330/base.hpp)
+        include/crypto330/block/aes.hpp
+        include/crypto330/block/utils.hpp
+        include/crypto330/block/kalyna.hpp
+        include/crypto330/block/block.hpp
+        include/crypto330/stream/block_stream.hpp
+        include/crypto330/stream/rc4.hpp
+)
 
 set(
         SOURCES
         src/aes.cpp
         src/utils.cpp
-        src/kalyna.cpp src/base.cpp)
+        src/kalyna.cpp
+        src/block.cpp
+        src/block_stream.cpp
+        src/rc4.cpp
+)
 
 add_library(crypto330 ${HEADERS} ${SOURCES})
 target_include_directories(crypto330 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
