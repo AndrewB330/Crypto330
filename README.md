@@ -7,6 +7,7 @@ University project. Implementation of:
 - Kalyna block cipher (128/128, 256/128, 256/256, 512/256, 512/512 types)
 - RC4 stream cipher (n = 8)
 - ECB, CBC, CFB, OFB, CTR block cipher mode of operation
+- Salsa
 
 ## Usage
 
@@ -55,4 +56,17 @@ Kalyna implementation is not completely optimal.
 | Kalyna 128/128  | 242.0s  | 79.5s  |
 | AES256  | 59.1s  | 18.4s  | 
 | Kalyna 512/512  | 342.1s  | 113.7s  |
+
+## Benchmarks2
+
+| Algorithm | 128MB |
+| ------------- | ------------- | 
+| Salsa  | 1.53s  |
+| RC4  | 0.77s  | 
+| ECB AES  | 5.3s | 
+| CBC AES  | 5.3s  | 
+| CFB AES  | 7.6s  | 
+| OFB AES  | 6.4s | 
+| CTR AES  | 6.8s  | 
+
 
