@@ -5,6 +5,8 @@
 #include <crypto330/stream/block_stream.hpp>
 #include <crypto330/stream/rc4.hpp>
 #include <crypto330/stream/salsa.hpp>
+#include <crypto330/hash/sha256.hpp>
+#include <crypto330/hash/kupyna.hpp>
 #include <fstream>
 
 // Test data from original papers
@@ -179,7 +181,7 @@ TEST(Stream, RC4) {
     EXPECT_EQ(data, expected);
 }
 
-TEST(Steam, Salsa) {
+TEST(Stream, Salsa) {
     std::vector<uint8_t> data = StringToBytes("XX Some random data, words, and other, !5$2552ASxv b\nf");
     std::vector<uint8_t> expected = data;
     Salsa enc("Cool Salsa Key");
@@ -192,109 +194,40 @@ TEST(Steam, Salsa) {
     EXPECT_EQ(data, expected);
 }
 
-TEST(Benchmark, salsa) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
-
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    Salsa enc("Cool Salsa Key");
-    enc.Encrypt(data);
-    enc.Decrypt(data);
+TEST(Hash, Sha256_empty) {
+    Sha256 hash;
+    std::vector<uint8_t> data = StringToBytes("");
+    std::vector<uint8_t> expected = HexStringToBytes("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    EXPECT_EQ(hash.GetHash(data), expected);
 }
 
-TEST(Benchmark, rc4) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
-
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    RC4 enc("Cool RC4 Key");
-    enc.Encrypt(data);
-    enc.Decrypt(data);
+TEST(Hash, Sha256_small) {
+    Sha256 hash;
+    std::vector<uint8_t> data = StringToBytes("shmall test %$$#");
+    std::vector<uint8_t> expected = HexStringToBytes("f23f9407ba9c86b8dd1cc4adb33460816e9c316a62cda5acd69ae1485f061cd7");
+    EXPECT_EQ(hash.GetHash(data), expected);
 }
 
-TEST(Benchmark, ecb) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
+TEST(Benchmark, test) {
+    Sha256 hash;
 
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
-    enc.Encrypt(data, BlockStreamEncryption::Mode::ECB);
-    enc.Decrypt(data, BlockStreamEncryption::Mode::ECB);
-}
-
-TEST(Benchmark, cbc) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
-
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
-    enc.Encrypt(data, BlockStreamEncryption::Mode::CBC);
-    enc.Decrypt(data, BlockStreamEncryption::Mode::CBC);
-}
-
-TEST(Benchmark, cfb) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
-
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
-    enc.Encrypt(data, BlockStreamEncryption::Mode::CFB);
-    enc.Decrypt(data, BlockStreamEncryption::Mode::CFB);
-}
-
-TEST(Benchmark, ofb) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
-
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
-    enc.Encrypt(data, BlockStreamEncryption::Mode::OFB);
-    enc.Decrypt(data, BlockStreamEncryption::Mode::OFB);
-}
-
-TEST(Benchmark, ctr) {
-    std::ifstream in("Data128MB.txt", std::ios_base::binary);
-
-    in.seekg(0, std::ios::end);
-    size_t length = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    std::vector<uint8_t> data(length);
-    in.read((char*)data.data(), length);
-
-    BlockStreamEncryption enc(std::make_unique<AES>(AES::Type::AES128, AES_KEY_128, true));
-    enc.Encrypt(data, BlockStreamEncryption::Mode::CTR);
-    enc.Decrypt(data, BlockStreamEncryption::Mode::CTR);
+    uint64_t target = 5;
+     for (uint64_t i = 0;; i++) {
+        auto data = StringToBytes(std::to_string(i) + "a");
+        auto h = hash.GetHash(data);
+        uint64_t j = 0;
+        uint8_t t = 0;
+        while(h[j] == 0) j++, t+=2;
+        if(h[j] < 16) t++;
+        if (t == target) {
+            std::cout << "Zero prefix found, on iteration " << i << std::endl;
+            for(uint8_t byte : h) {
+                printf("%02x",byte);
+            }
+            std::cout << std::endl;
+            break;
+        }
+    }
 }
 
 int main(int argc, char **argv) {

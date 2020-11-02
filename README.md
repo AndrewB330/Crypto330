@@ -69,4 +69,18 @@ Kalyna implementation is not completely optimal.
 | OFB AES  | 6.4s | 
 | CTR AES  | 6.8s  | 
 
+## Hashing Results
+#### SHA256
+Prefix of 20 zero bits found in: `~1'008'000` iterations and `0.8` seconds on average.
+
+With current Bitcoin difficulty, you can mine one block in `728'760'254'630` days, or `2'024'334'040` years. 
+- On one core CPU it can make `0.00004$` per year. 
+- After code optimization it can make `0.00008$` per year.
+- With 8 cores of my CPU it can make `0.0012$` per year.
+- With GPU it can make `0.12$` per year.
+
+**PR0FIT**
+
+#### Kupyna
+Prefix of 20 zero bits found in: `~1'250'000` iterations and `20.22` seconds on average.
 

@@ -16,7 +16,12 @@ set(
         include/crypto330/block/block.hpp
         include/crypto330/stream/block_stream.hpp
         include/crypto330/stream/rc4.hpp
-        include/crypto330/stream/salsa.hpp)
+        include/crypto330/stream/salsa.hpp
+        include/crypto330/hash/hash.hpp
+        include/crypto330/hash/sha256.hpp
+        include/crypto330/hash/kupyna.hpp
+)
+
 
 set(
         SOURCES
@@ -26,7 +31,10 @@ set(
         src/block.cpp
         src/block_stream.cpp
         src/rc4.cpp
-        src/salsa.cpp)
+        src/salsa.cpp
+        src/sha256.cpp
+        src/kupyna.cpp
+)
 
 add_library(crypto330 ${HEADERS} ${SOURCES})
 target_include_directories(crypto330 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")

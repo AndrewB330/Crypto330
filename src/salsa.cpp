@@ -53,5 +53,5 @@ void Salsa::Decrypt(std::vector<uint8_t> &data) const {
 
 Salsa::Salsa(const std::string &key_str) {
     assert(key_str.size() <= 32);
-    std::copy(key_str.begin(), key_str.end(), key);
+    std::copy(key_str.begin(), key_str.end(), (uint8_t*)key);
 }
