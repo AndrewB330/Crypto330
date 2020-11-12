@@ -34,7 +34,7 @@ set(
         src/salsa.cpp
         src/sha256.cpp
         src/kupyna.cpp
-)
+        include/crypto330/hugeint/hugeint.hpp src/hugeint.cpp)
 
 add_library(crypto330 ${HEADERS} ${SOURCES})
 target_include_directories(crypto330 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -46,5 +46,5 @@ target_link_libraries(runnable PUBLIC crypto330)
 add_subdirectory(googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_executable(unittest test/test.cpp)
+add_executable(unittest test/test.cpp test/hugeint_test.cpp)
 target_link_libraries(unittest PUBLIC crypto330 gtest_main)

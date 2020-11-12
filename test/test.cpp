@@ -6,7 +6,6 @@
 #include <crypto330/stream/rc4.hpp>
 #include <crypto330/stream/salsa.hpp>
 #include <crypto330/hash/sha256.hpp>
-#include <crypto330/hash/kupyna.hpp>
 #include <fstream>
 
 // Test data from original papers
@@ -206,28 +205,6 @@ TEST(Hash, Sha256_small) {
     std::vector<uint8_t> data = StringToBytes("shmall test %$$#");
     std::vector<uint8_t> expected = HexStringToBytes("f23f9407ba9c86b8dd1cc4adb33460816e9c316a62cda5acd69ae1485f061cd7");
     EXPECT_EQ(hash.GetHash(data), expected);
-}
-
-TEST(Benchmark, test) {
-    Sha256 hash;
-
-    uint64_t target = 5;
-     for (uint64_t i = 0;; i++) {
-        auto data = StringToBytes(std::to_string(i) + "a");
-        auto h = hash.GetHash(data);
-        uint64_t j = 0;
-        uint8_t t = 0;
-        while(h[j] == 0) j++, t+=2;
-        if(h[j] < 16) t++;
-        if (t == target) {
-            std::cout << "Zero prefix found, on iteration " << i << std::endl;
-            for(uint8_t byte : h) {
-                printf("%02x",byte);
-            }
-            std::cout << std::endl;
-            break;
-        }
-    }
 }
 
 int main(int argc, char **argv) {
