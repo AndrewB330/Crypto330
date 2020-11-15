@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <crypto330/block/kalyna.hpp>
-#include <crypto330/block/utils.hpp>
+#include <crypto330/utils.hpp>
 #include <crypto330/block/aes.hpp>
 #include <crypto330/stream/block_stream.hpp>
 #include <crypto330/stream/rc4.hpp>

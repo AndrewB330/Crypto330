@@ -1,14 +1,6 @@
 #include <crypto330/block/block.hpp>
 #include <fstream>
 
-void BlockEncryption::EncryptFile(const std::string &source, const std::string &destination) const {
-    ProcessFile(source, destination, true);
-}
-
-void BlockEncryption::DecryptFile(const std::string &source, const std::string &destination) const {
-    ProcessFile(source, destination, false);
-}
-
 void BlockEncryption::Encrypt(std::vector<uint8_t> &data) const {
     ProcessData(data, true);
 }

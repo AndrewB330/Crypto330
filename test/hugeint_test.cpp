@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <crypto330/hugeint/hugeint.hpp>
+#include <crypto330/hugeint/math.hpp>
 
 TEST(HugeInt, Stress) {
     std::vector<uint64_t> numbers;
@@ -63,8 +64,31 @@ TEST(HugeInt, Stress) {
 }
 
 TEST(HugeInt, Pow) {
-    EXPECT_EQ(1, PowMod(UHugeInt(331), UHugeInt(0), UHugeInt(100)).ToUint64());
-    EXPECT_EQ(111, PowMod(UHugeInt(331), UHugeInt(1), UHugeInt(220)).ToUint64());
-    EXPECT_EQ(91, PowMod(UHugeInt(331), UHugeInt(1583), UHugeInt(100)).ToUint64());
-    EXPECT_EQ(968334795, PowMod(UHugeInt(1583), UHugeInt(329), UHugeInt(1000000007)).ToUint64());
+    EXPECT_EQ(1, UHugeInt::PowMod(UHugeInt(331), UHugeInt(0), UHugeInt(100)).ToUint64());
+    EXPECT_EQ(111, UHugeInt::PowMod(UHugeInt(331), UHugeInt(1), UHugeInt(220)).ToUint64());
+    EXPECT_EQ(91, UHugeInt::PowMod(UHugeInt(331), UHugeInt(1583), UHugeInt(100)).ToUint64());
+    EXPECT_EQ(968334795, UHugeInt::PowMod(UHugeInt(1583), UHugeInt(329), UHugeInt(1000000007)).ToUint64());
+}
+
+TEST(HugeInt, IsProbablePrimeSmall) {
+    EXPECT_FALSE(IsProbablePrime(4));
+    EXPECT_FALSE(IsProbablePrime(1583 * 41));
+
+    EXPECT_TRUE(IsProbablePrime(2));
+    EXPECT_TRUE(IsProbablePrime(17));
+    EXPECT_TRUE(IsProbablePrime(1583));
+    EXPECT_TRUE(IsProbablePrime(1000000007));
+    EXPECT_TRUE(IsProbablePrime(1000000009));
+}
+
+TEST(HugeInt, IsProbablePrimeBig) {
+    EXPECT_FALSE(IsProbablePrime(1000000007ull * 1000000009ull));
+    EXPECT_FALSE(IsProbablePrime(UHugeInt("11111111111111111111113")));
+    EXPECT_FALSE(IsProbablePrime(UHugeInt("393050634124102232869567034555427371542904837")));
+
+    EXPECT_TRUE(IsProbablePrime(UHugeInt("11111111111111111111111")));
+    EXPECT_TRUE(IsProbablePrime(UHugeInt("1298074214633706835075030044377087")));
+    EXPECT_TRUE(IsProbablePrime(UHugeInt("35742549198872617291353508656626642567")));
+    EXPECT_TRUE(IsProbablePrime(UHugeInt("393050634124102232869567034555427371542904833")));
+    EXPECT_TRUE(IsProbablePrime(UHugeInt("359334085968622831041960188598043661065388726959079837")));
 }

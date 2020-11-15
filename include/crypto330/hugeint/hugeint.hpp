@@ -3,10 +3,14 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <random>
 
+/**
+ * Unsigned huge integer!
+ */
 class UHugeInt {
 public:
-    explicit UHugeInt(uint64_t value = 0);
+    UHugeInt(uint64_t value = 0);
 
     explicit UHugeInt(const std::string &value);
 
@@ -78,16 +82,28 @@ public:
 
     bool IsOdd() const;
 
+    uint64_t BitSize() const;
+
     uint64_t ToUint64() const;
 
-    friend std::pair<UHugeInt, UHugeInt> DivMod(UHugeInt a, UHugeInt b);
+    static UHugeInt PowMod(UHugeInt a, UHugeInt b, const UHugeInt & mod);
 
-    friend UHugeInt PowMod(UHugeInt a, UHugeInt b, const UHugeInt & mod);
+    static UHugeInt Rand(const UHugeInt & max, std::mt19937_64 & rng);
+
+    static UHugeInt Rand(const UHugeInt & min, const UHugeInt & max, std::mt19937_64 & rng);
+
+    static UHugeInt FromBytes(const std::vector<uint8_t> & bytes);
+
+    friend std::ostream & operator<<(std::ostream & out, const UHugeInt & val);
+
+    std::vector<uint8_t> ToBytes() const;
 
 protected:
     void Trunc();
 
     UHugeInt(std::vector<uint64_t>::const_iterator begin, std::vector<uint64_t>::const_iterator end);
+
+    static std::pair<UHugeInt, UHugeInt> DivMod(UHugeInt a, UHugeInt b);
 
     void AppendDigitBack(uint64_t digit);
 

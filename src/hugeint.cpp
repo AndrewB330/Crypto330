@@ -1,12 +1,17 @@
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
+#include <algorithm>
 #include "crypto330/hugeint/hugeint.hpp"
 
-const uint64_t DIGIT_SIZE = 32;
+const uint64_t DIGIT_SIZE = 32; // in bits
 const uint64_t BASE = 1ull << DIGIT_SIZE;
 const uint64_t MAX_DIGIT = BASE - 1;
+// x%BASE = x&MAX_DIGIT
+// x*BASE = x<<DIGIT_SIZE
 
-static_assert(DIGIT_SIZE * 2 <= sizeof(uint64_t) * 8);
+static_assert(DIGIT_SIZE * 2 <= sizeof(uint64_t) * 8); // overflow check
+static_assert(DIGIT_SIZE % 8 == 0); // should be byte aligned
 
 UHugeInt::UHugeInt(uint64_t value) {
     digits.push_back(value & MAX_DIGIT);
@@ -21,15 +26,16 @@ UHugeInt::UHugeInt(const std::string &value) {
         if (c < '0' || c > '9') {
             throw std::invalid_argument("[UHugeInt] Can't parse unsigned decimal integer from string");
         }
-        *this += (c - '0');
         *this *= 10;
+        *this += (c - '0');
     }
+    Trunc();
 }
 
 UHugeInt &UHugeInt::operator+=(const UHugeInt &other) {
     if (digits.size() < other.digits.size()) {
         digits.reserve(other.digits.size() + 1);
-        while(digits.size() < other.digits.size() + 1) {
+        while (digits.size() < other.digits.size() + 1) {
             digits.push_back(0);
         }
     } else {
@@ -298,7 +304,7 @@ UHugeInt UHugeInt::operator%(uint64_t other) const {
 uint64_t UHugeInt::ToUint64() const {
     uint64_t res = 0;
     for (size_t i = 0; i < digits.size(); i++) {
-        res = (res << DIGIT_SIZE) + digits[digits.size() -i - 1];
+        res = (res << DIGIT_SIZE) + digits[digits.size() - i - 1];
     }
     return res;
 }
@@ -313,8 +319,8 @@ UHugeInt &UHugeInt::operator>>=(uint64_t bits) {
 
     digits.erase(digits.begin(), digits.begin() + digits_offset);
     digits[0] >>= offset;
-    for(size_t i = 0; i + 1 < digits.size(); i++) {
-        digits[i] |= (digits[i+1] << (DIGIT_SIZE - offset)) & MAX_DIGIT;
+    for (size_t i = 0; i + 1 < digits.size(); i++) {
+        digits[i] |= (digits[i + 1] << (DIGIT_SIZE - offset)) & MAX_DIGIT;
         digits[i + 1] >>= offset;
     }
 
@@ -333,9 +339,9 @@ UHugeInt &UHugeInt::operator<<=(uint64_t bits) {
     digits.reserve(digits.size() + digits_offset + 1);
     digits.resize(digits.size() + digits_offset);
 
-    for(size_t i = 0; i + 1 < prev_size; i++) {
+    for (size_t i = 0; i + 1 < prev_size; i++) {
         size_t j = prev_size - i - 1;
-        digits[j + digits_offset] = ((digits[j] << offset) | (digits[j-1] >> (DIGIT_SIZE - offset))) & MAX_DIGIT;
+        digits[j + digits_offset] = ((digits[j] << offset) | (digits[j - 1] >> (DIGIT_SIZE - offset))) & MAX_DIGIT;
     }
 
     digits[digits_offset] = (digits[0] << offset) & MAX_DIGIT;
@@ -344,7 +350,7 @@ UHugeInt &UHugeInt::operator<<=(uint64_t bits) {
         digits.push_back(prefix);
     }
 
-    for(size_t i = 0; i < digits_offset; i++) {
+    for (size_t i = 0; i < digits_offset; i++) {
         digits[i] = 0;
     }
 
@@ -353,7 +359,7 @@ UHugeInt &UHugeInt::operator<<=(uint64_t bits) {
     return *this;
 }
 
-std::pair<UHugeInt, UHugeInt> DivMod(UHugeInt a, UHugeInt b) {
+std::pair<UHugeInt, UHugeInt> UHugeInt::DivMod(UHugeInt a, UHugeInt b) {
     if (b.IsZero()) {
         throw std::invalid_argument("[UHugeInt] Division by zero");
     }
@@ -365,7 +371,7 @@ std::pair<UHugeInt, UHugeInt> DivMod(UHugeInt a, UHugeInt b) {
     }
 
     uint64_t offset = 0;
-    while((b.GetTopDigit() << offset) <= (MAX_DIGIT >> 1)) {
+    while ((b.GetTopDigit() << offset) <= (MAX_DIGIT >> 1)) {
         offset++;
     }
 
@@ -411,9 +417,9 @@ UHugeInt UHugeInt::operator>>(uint64_t other) const {
     return UHugeInt(*this) >>= other;
 }
 
-UHugeInt PowMod(UHugeInt a, UHugeInt b, const UHugeInt &mod) {
+UHugeInt UHugeInt::PowMod(UHugeInt a, UHugeInt b, const UHugeInt &mod) {
     UHugeInt res = UHugeInt(1);
-    while(!b.IsZero()) {
+    while (!b.IsZero()) {
         if (b.IsOdd()) {
             res *= a;
             res %= mod;
@@ -427,4 +433,60 @@ UHugeInt PowMod(UHugeInt a, UHugeInt b, const UHugeInt &mod) {
 
 bool UHugeInt::IsOdd() const {
     return digits[0] & 1;
+}
+
+UHugeInt UHugeInt::Rand(const UHugeInt &max, std::mt19937_64 & rng) {
+    UHugeInt r;
+    r.digits.clear();
+    for (size_t i = 0; i < max.digits.size() + 8; i++) {
+        r.digits.push_back(rng() % (BASE - 1) + 1);
+    }
+    return r % (max + 1);
+}
+
+UHugeInt UHugeInt::Rand(const UHugeInt &min, const UHugeInt &max, std::mt19937_64 & rng) {
+    return Rand(max - min, rng) + min;
+}
+
+uint64_t UHugeInt::BitSize() const {
+    uint64_t res = (digits.size() - 1) * DIGIT_SIZE;
+    uint64_t x = GetTopDigit();
+    do {
+        res++;
+        x >>= 1;
+    } while (x);
+    return res;
+}
+
+std::ostream &operator<<(std::ostream &out, const UHugeInt &val) {
+    std::string res;
+    UHugeInt x = val;
+    do {
+        res += '0' + (x % 10).ToUint64();
+        x /= 10;
+    } while (!x.IsZero());
+    std::reverse(res.begin(), res.end());
+    return out << res;
+}
+
+std::vector<uint8_t> UHugeInt::ToBytes() const {
+    std::vector<uint8_t> bytes;
+    for (uint64_t digit : digits) {
+        bytes.insert(bytes.end(), (uint8_t *) (&digit), (uint8_t *) (&digit) + DIGIT_SIZE / 8);
+    }
+    return bytes;
+}
+
+UHugeInt UHugeInt::FromBytes(const std::vector<uint8_t> &bytes) {
+    UHugeInt number;
+    number.digits.clear();
+    for (uint64_t offset = 0; offset < bytes.size(); offset += DIGIT_SIZE / 8) {
+        uint64_t digit = 0;
+        std::copy(bytes.begin() + offset, bytes.begin() + std::min<size_t>(offset + DIGIT_SIZE / 8, bytes.size()),
+                  (uint8_t *) &digit);
+        assert(digit <= MAX_DIGIT);
+        number.digits.push_back(digit);
+    }
+    number.Trunc();
+    return number;
 }

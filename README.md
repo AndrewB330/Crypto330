@@ -1,13 +1,12 @@
 # Crypto330
 
-![XLOCC](https://europe-west6-xlocc-badge.cloudfunctions.net/XLOCC/AndrewB330/Crypto330?caption=Lines&color=blue&kill_cache=3)
-
 University project. Implementation of:
 - AES block cipher (128, 196, 256 key sizes)
 - Kalyna block cipher (128/128, 256/128, 256/256, 512/256, 512/512 types)
 - RC4 stream cipher (n = 8)
 - ECB, CBC, CFB, OFB, CTR block cipher mode of operation
 - Salsa
+- RSA + OAEP
 
 ## Usage
 
@@ -46,41 +45,34 @@ rc4.Encrypt(data);
 rc4.Decrypt(data);
 ```
 
-## Benchmarks
+## Benchmarks Block Encryption
 This implementation uses OpenMP if available, so it will be parallel by default. Also, 
 Kalyna implementation is not completely optimal.
 
-| Algorithm | Encrypt+Decrypt 1GB (OMP disabled) | Encrypt+Decrypt 1GB (OMP enabled) |
-| ------------- | ------------- | ------------- |
-| AES128  | 35.6s  | 11.3s  | 
-| Kalyna 128/128  | 242.0s  | 79.5s  |
-| AES256  | 59.1s  | 18.4s  | 
-| Kalyna 512/512  | 342.1s  | 113.7s  |
+| Algorithm      | Encrypt+Decrypt 1GB (OMP disabled) | Encrypt+Decrypt 1GB (OMP enabled) |
+| -------------- | ------------: | ------------: |
+| AES128         | 35.6s  | 11.3s  | 
+| Kalyna 128/128 | 242.0s | 79.5s  |
+| AES256         | 59.1s  | 18.4s  | 
+| Kalyna 512/512 | 342.1s | 113.7s |
 
-## Benchmarks2
+## Benchmarks Stream Encryption
 
-| Algorithm | 128MB |
-| ------------- | ------------- | 
-| Salsa  | 1.53s  |
-| RC4  | 0.77s  | 
-| ECB AES  | 5.3s | 
-| CBC AES  | 5.3s  | 
-| CFB AES  | 7.6s  | 
-| OFB AES  | 6.4s | 
-| CTR AES  | 6.8s  | 
+| Algorithm| 128MB  |
+| -------- | -----: | 
+| Salsa    | 1.53s  |
+| RC4      | 0.77s  | 
+| ECB AES  | 5.3s   | 
+| CBC AES  | 5.3s   | 
+| CFB AES  | 7.6s   | 
+| OFB AES  | 6.4s   | 
+| CTR AES  | 6.8s   | 
 
-## Hashing Results
-#### SHA256
-Prefix of 20 zero bits found in: `~1'008'000` iterations and `0.8` seconds on average.
+## Benchmarks RSA with OAEP Encryption
 
-With current Bitcoin difficulty, you can mine one block in `728'760'254'630` days, or `2'024'334'040` years. 
-- On one core CPU it can make `0.00004$` per year. 
-- After code optimization it can make `0.00008$` per year.
-- With 8 cores of my CPU it can make `0.0012$` per year.
-- With GPU it can make `0.12$` per year.
+| Public key size | KeyGen | Encrypt 1KB | Decrypt 1KB | Decrypt 1KB  + Optimization |
+| --------------- | -----: | ----------: | ----------: | --------------------------: |
+| 1024 Bit        | ~2.38 s|      0.02 s |      1.64 s |                      0.61 s |
+| 2048 Bit        | ~20.1 s|      0.03 s |      3.23 s |                      1.20 s |
 
-**PR0FIT**
-
-#### Kupyna
-Prefix of 20 zero bits found in: `~1'250'000` iterations and `20.22` seconds on average.
 

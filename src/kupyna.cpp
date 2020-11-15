@@ -1,5 +1,21 @@
 #include <crypto330/hash/kupyna.hpp>
-#include <crypto330/block/utils.hpp>
+#include <crypto330/utils.hpp>
+
+uint8_t gf8_lookup_kupyna[256][256];
+
+bool gf8_lookup_kupyna_initialized = false;
+
+void GF8_InitLookupKupyna() {
+    if (gf8_lookup_kupyna_initialized) {
+        return;
+    }
+    for (uint32_t a = 0; a < 256; a++) {
+        for (uint32_t b = 0; b < 256; b++) {
+            gf8_lookup_kupyna[a][b] = GF8_Mul(a, b, 0x1d);
+        }
+    }
+    gf8_lookup_kupyna_initialized = true;
+}
 
 uint8_t mds_matrix[8][8] = {
         {0x01, 0x01, 0x05, 0x01, 0x08, 0x06, 0x07, 0x04},
@@ -88,6 +104,7 @@ uint8_t sboxes[4][256] = {
 };
 
 Kupyna::Kupyna(Kupyna::Size size) : size(size) {
+    GF8_InitLookupKupyna();
     switch (size) {
         case Size::Kupyna256:
             hash_size = 256 / 8;
@@ -129,7 +146,7 @@ void Kupyna::MixColumns(uint8_t *block) const {
     for (uint64_t col = 0; col < columns; col++) {
         for (uint64_t row = 0; row < 8; row++) {
             for (uint64_t i = 0; i < 8; i++) {
-                res[col * 8 + row] ^= GF8_Mul_Kalyna(block[col * 8 + i], mds_matrix[row][i]);
+                res[col * 8 + row] ^= gf8_lookup_kupyna[block[col * 8 + i]][mds_matrix[row][i]];
             }
         }
     }
@@ -158,7 +175,7 @@ void Kupyna::ProcessBlock(uint8_t *block, bool p_or_q) const {
 }
 
 std::vector<uint8_t> Kupyna::GetHash(const std::vector<uint8_t> &data) const {
-    uint8_t block[8*16];
+    uint8_t block[8 * 16];
     std::fill(block, block + block_size, 0);
     block[0] = block_size;
 
@@ -169,22 +186,18 @@ std::vector<uint8_t> Kupyna::GetHash(const std::vector<uint8_t> &data) const {
     while (data_copy.size() % block_size != block_size - 12) {
         data_copy.push_back(0x00u);
     }
-    for (uint64_t i = 0; i < 12; i++)
-    {
+    for (uint64_t i = 0; i < 12; i++) {
         if (i < sizeof(size_t)) {
             data_copy.push_back(static_cast<char>(bit_length >> i * 8));
-        }
-        else {
+        } else {
             data_copy.push_back(static_cast<char>(0x00));
         }
     }
 
     uint8_t temp1[8 * 16];
     uint8_t temp2[8 * 16];
-    for (uint64_t offset = 0; offset < data_copy.size(); offset += block_size)
-    {
-        for (uint64_t i = 0; i < block_size; ++i)
-        {
+    for (uint64_t offset = 0; offset < data_copy.size(); offset += block_size) {
+        for (uint64_t i = 0; i < block_size; ++i) {
             temp1[i] = block[i] ^ data_copy[offset + i];
             temp2[i] = data_copy[offset + i];
         }

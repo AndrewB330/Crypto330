@@ -11,7 +11,7 @@ set(CMAKE_EXE_LINKER_FLAGS "--coverage")
 set(
         HEADERS
         include/crypto330/block/aes.hpp
-        include/crypto330/block/utils.hpp
+        include/crypto330/utils.hpp
         include/crypto330/block/kalyna.hpp
         include/crypto330/block/block.hpp
         include/crypto330/stream/block_stream.hpp
@@ -20,6 +20,9 @@ set(
         include/crypto330/hash/hash.hpp
         include/crypto330/hash/sha256.hpp
         include/crypto330/hash/kupyna.hpp
+        include/crypto330/hugeint/hugeint.hpp
+        include/crypto330/hugeint/math.hpp
+        include/crypto330/symmetric/rsa.hpp
 )
 
 
@@ -34,7 +37,10 @@ set(
         src/salsa.cpp
         src/sha256.cpp
         src/kupyna.cpp
-        include/crypto330/hugeint/hugeint.hpp src/hugeint.cpp)
+        src/hugeint.cpp
+        src/math.cpp
+        src/rsa.cpp
+)
 
 add_library(crypto330 ${HEADERS} ${SOURCES})
 target_include_directories(crypto330 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -46,5 +52,5 @@ target_link_libraries(runnable PUBLIC crypto330)
 add_subdirectory(googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_executable(unittest test/test.cpp test/hugeint_test.cpp)
+add_executable(unittest test/test.cpp test/hugeint_test.cpp test/rsa_test.cpp)
 target_link_libraries(unittest PUBLIC crypto330 gtest_main)
