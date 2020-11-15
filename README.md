@@ -70,9 +70,11 @@ Kalyna implementation is not completely optimal.
 
 ## Benchmarks RSA with OAEP Encryption
 
-| Public key size | KeyGen | Encrypt 1KB | Decrypt 1KB | Decrypt 1KB  + Optimization |
-| --------------- | -----: | ----------: | ----------: | --------------------------: |
-| 1024 Bit        | ~2.38 s|      0.02 s |      1.64 s |                      0.61 s |
-| 2048 Bit        | ~20.1 s|      0.03 s |      3.23 s |                      1.20 s |
+| Public key size* | KeyGen | Encrypt 1KB | Decrypt 1KB | Decrypt 1KB  + Optimization |
+| ---------------  | -----: | ----------: | ----------: | --------------------------: |
+| 1024 Bit         | ~2.38 s|      0.02 s |      1.64 s |                      0.61 s |
+| 2048 Bit         | ~20.1 s|      0.03 s |      3.23 s |                      1.20 s |
+
+*Size of the product of two primes, both prime numbers have half this size
 
 
