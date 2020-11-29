@@ -435,7 +435,7 @@ bool UHugeInt::IsOdd() const {
     return digits[0] & 1;
 }
 
-UHugeInt UHugeInt::Rand(const UHugeInt &max, std::mt19937_64 & rng) {
+UHugeInt UHugeInt::Rand(const UHugeInt &max, std::mt19937_64 &rng) {
     UHugeInt r;
     r.digits.clear();
     for (size_t i = 0; i < max.digits.size() + 8; i++) {
@@ -444,7 +444,7 @@ UHugeInt UHugeInt::Rand(const UHugeInt &max, std::mt19937_64 & rng) {
     return r % (max + 1);
 }
 
-UHugeInt UHugeInt::Rand(const UHugeInt &min, const UHugeInt &max, std::mt19937_64 & rng) {
+UHugeInt UHugeInt::Rand(const UHugeInt &min, const UHugeInt &max, std::mt19937_64 &rng) {
     return Rand(max - min, rng) + min;
 }
 
@@ -489,4 +489,145 @@ UHugeInt UHugeInt::FromBytes(const std::vector<uint8_t> &bytes) {
     }
     number.Trunc();
     return number;
+}
+
+UHugeInt UHugeInt::FromHex(const std::string &hex) {
+    UHugeInt res;
+    for(auto c : hex) {
+        res <<= 4;
+        res += (c >= '0' && c <= '9' ? c - '0' : (c < 'a' ? c - 'A' : c - 'a') + 10);
+    }
+    return res;
+}
+
+HugePolyF2::HugePolyF2(const UHugeInt &poly) : poly(poly) {}
+
+HugePolyF2::HugePolyF2(const std::vector<uint64_t> &powers) {
+    for (uint64_t p : powers) {
+        poly += (UHugeInt(1) << p);
+    }
+}
+
+HugePolyF2 &HugePolyF2::operator+=(const HugePolyF2 &other) {
+    if (poly.digits.size() < other.poly.digits.size()) {
+        while (poly.digits.size() < other.poly.digits.size()) {
+            poly.digits.push_back(0);
+        }
+    }
+
+    for (size_t i = 0; i < poly.digits.size(); i++) {
+        poly.digits[i] ^= (i < other.poly.digits.size() ? other.poly.digits[i] : 0);
+    }
+    poly.Trunc();
+    return *this;
+}
+
+uint64_t PolyMul(uint64_t a, uint64_t b) {
+    uint64_t res = 0;
+    while (b) {
+        if (b & 1)
+            res ^= a;
+        a = a << 1;
+        b >>= 1;
+    }
+    return res;
+}
+
+HugePolyF2 &HugePolyF2::operator*=(const HugePolyF2 &other) {
+    std::vector<uint64_t> res(poly.digits.size() + other.poly.digits.size());
+    for (size_t i = 0; i < poly.digits.size(); i++) {
+        uint64_t carry = 0;
+        for (size_t j = 0; j < other.poly.digits.size() || carry; j++) {
+            res[i + j] ^= PolyMul(poly.digits[i], (j < other.poly.digits.size() ? other.poly.digits[j] : 0)) ^ carry;
+            carry = res[i + j] >> DIGIT_SIZE;
+            res[i + j] &= MAX_DIGIT;
+        }
+    }
+
+    poly.digits = std::move(res);
+    poly.Trunc();
+
+    return *this;
+}
+
+HugePolyF2 &HugePolyF2::operator/=(const HugePolyF2 &other) {
+    return *this = DivMod(*this, other).first;
+}
+
+HugePolyF2 &HugePolyF2::operator%=(const HugePolyF2 &other) {
+    return *this = DivMod(*this, other).second;
+}
+
+std::pair<HugePolyF2, HugePolyF2> HugePolyF2::DivMod(HugePolyF2 a, HugePolyF2 b) {
+    if (a.poly.BitSize() < b.poly.BitSize()) {
+        return {HugePolyF2(0), a};
+    }
+    uint64_t c = (a.poly.BitSize() - b.poly.BitSize());
+    HugePolyF2 res;
+    HugePolyF2 tmp = a;
+    for (uint64_t i = 0; i <= c; i++) {
+        uint64_t j = c - i;
+        int tt = tmp.poly.BitSize();
+        int tt1 = (b << j).poly.BitSize();
+        if (tmp.poly.BitSize() == a.poly.BitSize() - i) {
+            tmp = tmp + (b << j);
+            int ttt = tmp.poly.BitSize();
+            res = res + (HugePolyF2(1) << j);
+        }
+    }
+    return {res, tmp};
+}
+
+HugePolyF2 &HugePolyF2::operator>>=(uint64_t bits) {
+    poly >>= bits;
+    return *this;
+}
+
+HugePolyF2 &HugePolyF2::operator<<=(uint64_t bits) {
+    poly <<= bits;
+    return *this;
+}
+
+HugePolyF2 HugePolyF2::operator+(HugePolyF2 other) const {
+    return other += *this;
+}
+
+HugePolyF2 HugePolyF2::operator*(HugePolyF2 other) const {
+    return other *= *this;
+}
+
+HugePolyF2 HugePolyF2::operator/(HugePolyF2 other) const {
+    return DivMod(*this, other).first;
+}
+
+HugePolyF2 HugePolyF2::operator%(HugePolyF2 other) const {
+    return DivMod(*this, other).second;
+}
+
+HugePolyF2 HugePolyF2::operator<<(uint64_t other) const {
+    return HugePolyF2(*this) <<= other;
+}
+
+HugePolyF2 HugePolyF2::operator>>(uint64_t other) const {
+    return HugePolyF2(*this) >>= other;
+}
+
+UHugeInt HugePolyF2::ToUHugeInt() const {
+    return poly;
+}
+
+bool HugePolyF2::operator==(const HugePolyF2 &other) const {
+    return poly == other.poly;
+}
+
+bool HugePolyF2::operator!=(const HugePolyF2 &other) const {
+    return !(*this == other);
+}
+
+HugePolyF2 HugePolyF2::FromHex(const std::string &hex) {
+    return HugePolyF2(UHugeInt::FromHex(hex));
+}
+
+uint64_t HugePolyF2::ToUint64() const {
+    return poly.ToUint64();
 }

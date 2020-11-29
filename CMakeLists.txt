@@ -23,7 +23,7 @@ set(
         include/crypto330/hugeint/hugeint.hpp
         include/crypto330/hugeint/math.hpp
         include/crypto330/symmetric/rsa.hpp
-)
+        include/crypto330/symmetric/elliptic.hpp)
 
 
 set(
@@ -40,7 +40,7 @@ set(
         src/hugeint.cpp
         src/math.cpp
         src/rsa.cpp
-)
+        src/elliptic.cpp)
 
 add_library(crypto330 ${HEADERS} ${SOURCES})
 target_include_directories(crypto330 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -52,5 +52,5 @@ target_link_libraries(runnable PUBLIC crypto330)
 add_subdirectory(googletest)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_executable(unittest test/test.cpp test/hugeint_test.cpp test/rsa_test.cpp)
+add_executable(unittest test/test.cpp test/hugeint_test.cpp test/rsa_test.cpp test/elliptic_test.cpp)
 target_link_libraries(unittest PUBLIC crypto330 gtest_main)

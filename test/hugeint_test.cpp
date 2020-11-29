@@ -92,3 +92,16 @@ TEST(HugeInt, IsProbablePrimeBig) {
     EXPECT_TRUE(IsProbablePrime(UHugeInt("393050634124102232869567034555427371542904833")));
     EXPECT_TRUE(IsProbablePrime(UHugeInt("359334085968622831041960188598043661065388726959079837")));
 }
+
+TEST(HugePolyF2, Operations) {
+    HugePolyF2 a = HugePolyF2(0b1001);
+    HugePolyF2 m = HugePolyF2(0b10001000101);
+    EXPECT_EQ((a % m + (a / m) * m).ToUint64(), a.ToUint64());
+}
+
+TEST(HugePolyF2, Inverse) {
+    HugePolyF2 a = HugePolyF2(0b00000101010);
+    HugePolyF2 m = HugePolyF2(0b10000101011);
+    HugePolyF2 ai = InverseModulo(a, m);
+    EXPECT_TRUE((a * ai) % m == HugePolyF2(1));
+}

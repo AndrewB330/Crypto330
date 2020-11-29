@@ -36,12 +36,31 @@ void Extended(UHugeInt a, UHugeInt b, UHugeInt &x, UHugeInt &y, bool &x_neg, boo
     }
 }
 
+void Extended(HugePolyF2 a, HugePolyF2 b, HugePolyF2 &x, HugePolyF2 &y) {
+    if (a == HugePolyF2(0)) {
+        x = HugePolyF2(0);
+        y = HugePolyF2(1);
+        return;
+    }
+    HugePolyF2 x1, y1;
+    Extended(b % a, a, x1, y1);
+
+    x = y1 + (b / a) * x1;
+    y = x1;
+}
+
 UHugeInt InverseModulo(const UHugeInt &a, const UHugeInt &mod) {
     UHugeInt x, y;
     bool xn, yn;
     Extended(a, mod, x, y, xn, yn);
     assert(x < mod);
     return xn ? mod - x : x;
+}
+
+HugePolyF2 InverseModulo(const HugePolyF2 & a, const HugePolyF2 & mod) {
+    HugePolyF2 x, y;
+    Extended(a, mod, x, y);
+    return x;
 }
 
 bool IsProbablePrime(const UHugeInt &number, uint64_t tests) {

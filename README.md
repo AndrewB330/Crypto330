@@ -7,6 +7,7 @@ University project. Implementation of:
 - ECB, CBC, CFB, OFB, CTR block cipher mode of operation
 - Salsa
 - RSA + OAEP
+- Elliptic Curves Signature
 
 ## Usage
 
