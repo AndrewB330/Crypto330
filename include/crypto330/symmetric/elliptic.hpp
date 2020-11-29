@@ -44,10 +44,10 @@ public:
     friend class EllipticCurvePoint;
 
 private:
-    HugePolyF2 mod;
+    HugePolyF2 mod; // modulo
     HugePolyF2 A, B; // y^2 + xy = x^3 + Ax^2 + B
-    EllipticCurvePoint g;
-    UHugeInt n;
+    EllipticCurvePoint g; // generator point
+    UHugeInt n; // generator point period (g*(n+1) = g)
 };
 
 namespace EllipticSignature {

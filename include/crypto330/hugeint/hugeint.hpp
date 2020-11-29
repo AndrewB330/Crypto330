@@ -118,6 +118,7 @@ protected:
     std::vector<uint64_t> digits;
 };
 
+// Field of polynomials with coefficients modulo 2 (Or GF(2^n))
 class HugePolyF2 {
 public:
     explicit HugePolyF2(const UHugeInt &poly = 0);

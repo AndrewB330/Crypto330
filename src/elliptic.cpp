@@ -73,6 +73,9 @@ EllipticCurvePoint EllipticCurve::GeneratePoint(std::mt19937_64 &rng) const {
 
 using namespace EllipticSignature;
 
+// Elliptic Curve Digital Signature Algorithm
+// https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+
 std::pair<PrivateKey, PublicKey> GenerateKeys(const EllipticCurve &curve, std::mt19937_64 &rng) {
     auto x = UHugeInt::Rand(1, curve.GetN() - 1, rng);
     auto Q = curve.GetG() * x;
