@@ -3,6 +3,14 @@
 #include <crypto330/symmetric/rsa.hpp>
 #include <crypto330/utils.hpp>
 
+TEST(RSA, Basic1024_empty) {
+    auto [private_key, public_key] = RSA::GenerateKeys(1024, 0);
+    UHugeInt message = UHugeInt::FromBytes(StringToBytes(""));
+    UHugeInt encrypted = RSA::Encrypt(message, public_key);
+    UHugeInt decrypted = RSA::Decrypt(encrypted, private_key);
+    EXPECT_EQ(message, decrypted);
+}
+
 TEST(RSA, Basic1024) {
     auto [private_key, public_key] = RSA::GenerateKeys(1024, 0);
     UHugeInt message = UHugeInt::FromBytes(StringToBytes("Random msg"));

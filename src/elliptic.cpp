@@ -76,20 +76,20 @@ using namespace EllipticSignature;
 // Elliptic Curve Digital Signature Algorithm
 // https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm
 
-std::pair<PrivateKey, PublicKey> GenerateKeys(const EllipticCurve &curve, std::mt19937_64 &rng) {
+std::pair<PrivateKey, PublicKey> EllipticSignature::GenerateKeys(const EllipticCurve &curve, std::mt19937_64 &rng) {
     auto x = UHugeInt::Rand(1, curve.GetN() - 1, rng);
     auto Q = curve.GetG() * x;
     return {PrivateKey{x}, PublicKey{Q}};
 }
 
-Signature CreateSignature(const UHugeInt & message, const PrivateKey & key, const EllipticCurve & curve, std::mt19937_64 &rng) {
+Signature EllipticSignature::CreateSignature(const UHugeInt & message, const PrivateKey & key, const EllipticCurve & curve, std::mt19937_64 &rng) {
     auto q = curve.GetN();
     auto k = UHugeInt::Rand(1, q, rng);
     auto r = (curve.GetG() * k).x.ToUHugeInt() % q;
     return {r, (InverseModulo(k, q) * (message + key.x * r)) % q};
 }
 
-bool CheckSignature(const UHugeInt &message, const Signature & sign, const PublicKey &key, const EllipticCurve &curve) {
+bool EllipticSignature::CheckSignature(const UHugeInt &message, const Signature & sign, const PublicKey &key, const EllipticCurve &curve) {
     auto q = curve.GetN();
     auto u1 = InverseModulo(sign.s, q) * message % q;
     auto u2 = InverseModulo(sign.s, q) * sign.r % q;

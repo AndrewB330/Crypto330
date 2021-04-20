@@ -60,8 +60,8 @@ namespace EllipticSignature {
     };
 
     struct Signature {
-        UHugeInt s;
         UHugeInt r;
+        UHugeInt s;
     };
 
     std::pair<PrivateKey, PublicKey> GenerateKeys(const EllipticCurve &curve, std::mt19937_64 &rng);
